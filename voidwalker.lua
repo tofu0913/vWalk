@@ -124,8 +124,7 @@ function getDirection(x,y)
 	return compass[index], angle, angle/(math.pi/8)
 end
 
-lastDist = 0
-minDist = 99
+minDist = 999
 
 windower.register_event('prerender', function(...)
 	if not on then return end
@@ -147,20 +146,15 @@ windower.register_event('prerender', function(...)
 		if distance < 2 then
 			settings.str = direction .. " SIT"
             if autoTracking then
-                -- windower.send_command('setkey h;wait 0.5;setkey h up')
-                -- log('sit right there!!!')
                 windower.ffxi.run(false)
                 windower.send_command('input /heal on;wait 1;input /heal off')
             end
 		end
 		text:text(settings.str)
-        -- log(lastDist..' vs '..minDist)
-        if autoTracking and lastDist>0 and lastDist - minDist >5  then
+        if autoTracking and distance - minDist >2  then--workarround, if stucked
             log('Track agin...')
             windower.send_command('input /heal on;wait 1;input /heal off')
-            minDist = 99
         end
-        lastDist = distance
         if distance < minDist then
             minDist = distance
         end
@@ -170,7 +164,7 @@ windower.register_event('prerender', function(...)
 end)
 
 windower.register_event('keyboard', function(dik)
-    if T{17,30,31,32}:contains(dik) then
+    if T{17,30,31,32}:contains(dik) then--keyboard to stop auto tracking
         if autoTracking then
             autoTracking = false
             log('keyboard interrupted, stopping.')
@@ -222,6 +216,7 @@ windower.register_event('incoming chunk', function(id,original,modified,injected
 			targetPos.x = newx
 			targetPos.y = newy
             handleAutoTacking(directionID, distance)
+            minDist = 999
         end
     --[[elseif id == 0x0E8 then
 		if windower.ffxi.get_player().status ~= 33 then
