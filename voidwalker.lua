@@ -153,6 +153,7 @@ windower.register_event('prerender', function(...)
 		text:text(settings.str)
         if autoTracking and distance - minDist >2  then--workarround, if stucked
             log('Track agin...')
+            windower.ffxi.run(false)
             windower.send_command('input /heal on;wait 1;input /heal off')
         end
         if distance < minDist then
