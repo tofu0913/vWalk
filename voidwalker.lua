@@ -274,15 +274,15 @@ function handleAutoTacking (dir, dist)
 	end
     windower.ffxi.turn(angle)
     autoTrackingAngle = angle
-    windower.send_command('setkey v;wait 0.5;setkey v up')
     
     if dist == 45 or dist==0 then
         return
     end
-    --Auto tracking must less than 50ym
-    if dist<99 then
+    if dist<100 then--auto tracking mode, must less than 100ym
         log('Auto tracking start!!! Distance='..dist)
         autoTracking = true
+    else--manual tracking mode
+        windower.send_command('setkey v;wait 0.5;setkey v up')
     end
 end
 
