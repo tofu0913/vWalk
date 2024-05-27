@@ -230,6 +230,7 @@ require('coroutine')
 
 windower.register_event('status change', function(new, old)
     local s = windower.ffxi.get_mob_by_target('me')
+    -- log('n:'..new..' o'..old)
     if new == 0 and old == 33 then --standing from rest
         if autoTracking then
             log('auto running...')
@@ -273,12 +274,12 @@ function handleAutoTacking (dir, dist)
     if dist == 45 or dist==0 then
         return
     end
-    if dist<100 then--auto tracking mode, must less than 100ym
+    -- if dist<100 then--auto tracking mode, must less than 100ym
         log('Auto tracking start!!! Distance='..dist)
         autoTracking = true
-    else--manual tracking mode
-        windower.send_command('setkey v;wait 0.5;setkey v up')
-    end
+    -- else--manual tracking mode
+        -- windower.send_command('setkey v;wait 0.5;setkey v up')
+    -- end
 end
 
 function changeOnOff(_on)
@@ -330,6 +331,9 @@ windower.register_event('addon command', function(command, ...)
 		if not on then
 			changeOnOff(true)
 		end
+    elseif command == "t" then
+        autoTracking = true
+        windower.ffxi.run(autoTrackingAngle)
     elseif boolCheck(command) ~= nil then
 		changeOnOff(boolCheck(command))
 	end
