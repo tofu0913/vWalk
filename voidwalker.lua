@@ -25,10 +25,10 @@
         (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ]]
-_addon.author = 'Rubenator, modded by Icy'
+_addon.author = 'Rubenator, Icy, Cliff'
 _addon.command = 'vw'
 _addon.name = 'VoidWalker'
-_addon.version = '0.9.0i'
+_addon.version = '1.0.0c'
 
 -- adjust the settings xml
 -- added the save command so you don't have to use the old move command anymore. Just drag the box where you want it and //vw save
@@ -79,6 +79,9 @@ setup_text(text)
 settings:save("all")
 text:text("[vw]")
 
+local autoTracking = false
+local autoTrackingAngle = 0
+
 function stopTracking()
 	targetPos = nil
 end
@@ -121,6 +124,8 @@ function getDirection(x,y)
 	return compass[index], angle, angle/(math.pi/8)
 end
 
+lastDist = 0
+minDist = 99
 
 windower.register_event('prerender', function(...)
 	if not on then return end
@@ -141,13 +146,38 @@ windower.register_event('prerender', function(...)
 		
 		if distance < 2 then
 			settings.str = direction .. " SIT"
+            if autoTracking then
+                -- windower.send_command('setkey h;wait 0.5;setkey h up')
+                -- log('sit right there!!!')
+                windower.ffxi.run(false)
+                windower.send_command('input /heal on;wait 1;input /heal off')
+            end
 		end
 		text:text(settings.str)
+        -- log(lastDist..' vs '..minDist)
+        if autoTracking and lastDist>0 and lastDist - minDist >5  then
+            log('Track agin...')
+            windower.send_command('input /heal on;wait 1;input /heal off')
+            minDist = 99
+        end
+        lastDist = distance
+        if distance < minDist then
+            minDist = distance
+        end
 	elseif not on then
 		text:text("[vw]")
 	end
 end)
 
+windower.register_event('keyboard', function(dik)
+    if T{17,30,31,32}:contains(dik) then
+        if autoTracking then
+            autoTracking = false
+            log('keyboard interrupted, stopping.')
+        end
+    end
+    
+end)
 
 windower.register_event('zone change', function(new, old)
     stopTracking()
@@ -187,10 +217,11 @@ windower.register_event('incoming chunk', function(id,original,modified,injected
 			--print(getDistance(newx, newy), "distance")
 			--local dir, angle, segment = getDirection(newx, newy)
 			--print("dir", dir, "angle", angle, "segment", segment)
-			--print(direction, distance)
+			-- print(direction, distance)
 			targetPos = {}
 			targetPos.x = newx
 			targetPos.y = newy
+            handleAutoTacking(directionID, distance)
         end
     --[[elseif id == 0x0E8 then
 		if windower.ffxi.get_player().status ~= 33 then
@@ -200,6 +231,60 @@ windower.register_event('incoming chunk', function(id,original,modified,injected
 	end
 	
 end)
+require('coroutine')
+
+windower.register_event('status change', function(new, old)
+    local s = windower.ffxi.get_mob_by_target('me')
+    if new == 0 and old == 33 then --standing from rest
+        if autoTracking then
+            log('auto running...')
+            coroutine.sleep(4)
+            windower.ffxi.run(autoTrackingAngle)
+        end
+    end
+end)
+
+function handleAutoTacking (dir, dist)
+    -- 0 = 'East'
+    -- 1 = 'Southeast'
+    -- 2 = 'South'
+    -- 3 = 'Southwest'
+    -- 4 = 'West'
+    -- 5 = 'Northwest'
+    -- 6 = 'North'
+    -- 7 = 'Northeast'
+    autoTracking = false
+	
+	if dir==7 then
+		angle = 7*math.pi/4
+	elseif dir==5 then
+		angle = 5*math.pi/4
+	elseif dir==3 then
+		angle = 3*math.pi/4
+	elseif dir==1 then
+		angle = math.pi/4
+	elseif dir==0 then
+		angle = 0
+	elseif dir==4 then
+		angle = math.pi
+	elseif dir==6 then
+		angle = 3*math.pi/2
+	elseif dir==2 then
+		angle = math.pi/2
+	end
+    windower.ffxi.turn(angle)
+    autoTrackingAngle = angle
+    windower.send_command('setkey v;wait 0.5;setkey v up')
+    
+    if dist == 45 or dist==0 then
+        return
+    end
+    --Auto tracking must less than 50ym
+    if dist<99 then
+        log('Auto tracking start!!! Distance='..dist)
+        autoTracking = true
+    end
+end
 
 function changeOnOff(_on)
 	if _on == nil then
