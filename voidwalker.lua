@@ -184,7 +184,7 @@ windower.register_event('prerender', function(...)
 end)
 
 windower.register_event('keyboard', function(dik)
-    if T{17,30,31,32}:contains(dik) then--keyboard to stop auto tracking
+    if T{1,17,30,31,32}:contains(dik) then--keyboard to stop auto tracking
         if autoTracking then
             autoTracking = false
             log('keyboard interrupted, stopping.')
