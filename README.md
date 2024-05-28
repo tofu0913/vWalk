@@ -1,8 +1,14 @@
 
 ### Usage
 
-Just load the addon and you're all set.
-It is recommended to unload if not in use.
+Just load the addon and you're all set.<br>
+It is recommended to unload if not in use.<br>
+<br>
+Use /heal to trigger the hint and vWalk will automatically start "Auto tracking" after receiving the hint.<br>
+Recommand marco: <br>
+/hea on <wait 1> <br>
+/heal off<br><br>
+Press the Esc, W, A, S, D keys on your keyboard to stop "Auto tracking".
 
 ### Commands
 
