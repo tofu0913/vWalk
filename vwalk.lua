@@ -158,7 +158,7 @@ windower.register_event('prerender', function(...)
             diff = math.abs(lastDist - distance)
             if diff ~=0 and diff < 0.17 then--sutcked
                 stuckPoint = stuckPoint +1
-                -- log('s '..stuckPoint..'del='..math.abs(lastDist - distance))
+                -- log('s '..stuckPoint..'delta='..math.abs(lastDist - distance))
                 if stuckPoint > 100 then--Sutcked
                     log('Stuck... Please help...')
                     -- windower.play_sound(''..windower.addon_path..'error.mp3')
@@ -197,6 +197,7 @@ windower.register_event('zone change', function(new, old)
     stopTracking()
 	text:text("[vw]")
 end)
+
 -- inspect = require('inspect')
 -- require('logger')
 windower.register_event('incoming chunk', function(id,original,modified,injected,blocked)
@@ -252,6 +253,7 @@ windower.register_event('status change', function(new, old)
     local s = windower.ffxi.get_mob_by_target('me')
     -- log('n:'..new..' o'..old)
     if new == 0 and old == 33 then --standing from rest
+    --TODO: How to handle cannot rest if hit by mob
         if autoTracking then
             log('auto running...')
             coroutine.sleep(4)
@@ -294,71 +296,23 @@ function handleAutoTacking (dir, dist)
     if dist == 45 or dist==0 then
         return
     end
-    -- if dist<100 then--auto tracking mode, must less than 100ym
-        log('Auto tracking start!!! Distance='..dist)
-        autoTracking = true
-        -- if windower.ffxi.get_player().status == 0 then
-            -- windower.ffxi.run(autoTrackingAngle)
-        -- end
-    -- else--manual tracking mode
-        -- windower.send_command('setkey v;wait 0.5;setkey v up')
-    -- end
-end
 
-function changeOnOff(_on)
-	if _on == nil then
-		changeOnOff(not on)
-		return
-	end
-	
-	on = _on
-	
-	if on then
-		log("VoidWalker now ON")
-		text:text("")
-		text:show()
-	else
-		log("VoidWalker now OFF")
-		text:text("")
-		text:hide()
-	end
-end
-
-
-local yes = L{"on","true","t","1"}
-local no = L{"off","false","f","0"}
-function boolCheck(str)
-	if str == nil then
-		return nil
-	elseif yes:contains(str) then
-		return true
-	elseif no:contains(str) then
-		return false
-	else
-		return nil
-	end
+    log('Auto tracking start!!! Distance='..dist)
+    autoTracking = true
 end
 
 
 windower.register_event('addon command', function(command, ...)
     if command then
 		command = command:lower()
-	else
-		changeOnOff()
-	end
-	if command == "save" then
-		settings:save("all")
-		log('settings saved')
-	elseif command == "reset" then
-		stopTracking()
-		if not on then
-			changeOnOff(true)
-		end
-    elseif command == "t" then
-        autoTracking = true
-        windower.ffxi.run(autoTrackingAngle)
-    elseif boolCheck(command) ~= nil then
-		changeOnOff(boolCheck(command))
+
+        if command == "save" then
+            settings:save("all")
+            log('settings saved')
+        else--debug
+            autoTracking = true
+            windower.ffxi.run(autoTrackingAngle)
+        end
 	end
 end)
 
