@@ -25,9 +25,9 @@
         (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
         SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ]]
-_addon.author = 'Rubenator, Icy, Cliff'
+_addon.author = 'Cliff, Based on Rubenator, Icy, Garyfromwork and inspired by Kouryuu'
 _addon.command = 'vw'
-_addon.name = 'VoidWalker'
+_addon.name = 'vWalk'
 _addon.version = '1.0.0c'
 
 -- adjust the settings xml
