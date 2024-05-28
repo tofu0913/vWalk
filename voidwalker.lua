@@ -125,6 +125,8 @@ function getDirection(x,y)
 end
 
 minDist = 999
+lastDist = 0
+stuckPoint = 0
 
 windower.register_event('prerender', function(...)
 	if not on then return end
@@ -151,13 +153,30 @@ windower.register_event('prerender', function(...)
             end
 		end
 		text:text(settings.str)
-        if autoTracking and distance - minDist >2  then--workarround, if stucked
-            log('Track agin...')
-            windower.ffxi.run(false)
-            windower.send_command('input /heal on;wait 1;input /heal off')
-        end
-        if distance < minDist then
-            minDist = distance
+        
+        if autoTracking then
+            diff = math.abs(lastDist - distance)
+            if diff ~=0 and diff < 0.17 then--sutcked
+                stuckPoint = stuckPoint +1
+                -- log('s '..stuckPoint..'del='..math.abs(lastDist - distance))
+                if stuckPoint > 100 then--Sutcked
+                    log('Stuck... Please help...')
+                    -- windower.play_sound(''..windower.addon_path..'error.mp3')
+                    windower.ffxi.run(false)
+                    autoTracking = false
+                    -- windower.send_command('input /heal on;wait 1;input /heal off')
+                end
+            else
+                stuckPoint = 0
+            end
+            if distance - minDist >2 then--Overrun
+                windower.ffxi.run(false)
+                windower.send_command('input /heal on;wait 1;input /heal off')
+            end
+            if distance < minDist then
+                minDist = distance
+            end
+            lastDist = distance
         end
 	elseif not on then
 		text:text("[vw]")
@@ -278,6 +297,9 @@ function handleAutoTacking (dir, dist)
     -- if dist<100 then--auto tracking mode, must less than 100ym
         log('Auto tracking start!!! Distance='..dist)
         autoTracking = true
+        -- if windower.ffxi.get_player().status == 0 then
+            -- windower.ffxi.run(autoTrackingAngle)
+        -- end
     -- else--manual tracking mode
         -- windower.send_command('setkey v;wait 0.5;setkey v up')
     -- end
@@ -340,3 +362,7 @@ windower.register_event('addon command', function(command, ...)
 	end
 end)
 
+
+windower.register_event('load', function()
+    log('=================loaded=================')
+end)
